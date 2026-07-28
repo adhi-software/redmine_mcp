@@ -6,4 +6,4 @@ en:
   label_mcp_tool_method: "Method"
   label_mcp_tool_description: "Description"
 
-  label_mcp_agent_note: "Connect compatible LLM clients (e.g., OpenAI or Claude) or the Redmine Agent to this MCP endpoint."
+  label_mcp_agent_note: "This MCP endpoint can be connected to compatible LLM clients (e.g., Claude or OpenAI) or the Redmine Agent plugin."
