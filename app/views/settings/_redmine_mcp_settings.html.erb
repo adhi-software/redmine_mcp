@@ -1,7 +1,20 @@
+<%= stylesheet_link_tag "redmine_mcp", plugin: "redmine_mcp" %>
+<%= javascript_include_tag "redmine_mcp", plugin: "redmine_mcp" %>
 <div class="box">
   <div style="display:flex; align-items:center; gap:20px;">
     <strong style="min-width:140px;"><%= l(:label_mcp_endpoint) %></strong>
-    <code><%= mcp_url %></code>
+    <code id="mcp-endpoint-url"><%= mcp_url %></code>
+    <button
+      type="button"
+      id="copy-mcp-url"
+      class="icon-only-button"
+      aria-label="<%= l(:button_copy) %>"
+      title="<%= l(:button_copy) %>">
+
+      <span id="copy-icon">
+        <%= sprite_icon('copy') %>
+      </span>
+    </button>
   </div>
 </div>
 

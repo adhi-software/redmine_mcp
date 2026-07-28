@@ -19,11 +19,11 @@
 
 Redmine::Plugin.register :redmine_mcp do
   name 'Redmine MCP'
-  author 'Adhi software pvt ltd'
+  author 'Adhi Software Pvt Ltd'
   description 'Redmine MCP'
   version RedmineMcp::VERSION
-  url 'https://www.erpmine.org'
   requires_redmine version_or_higher: '6.0.0'
+  author_url 'http://www.adhisoftware.co.in/'
 
   # The MCP endpoint authenticates with a Redmine REST API key, so it does not
   # add its own project/global permission. Access to data is still bounded by
