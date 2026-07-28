@@ -1,0 +1,9 @@
+en:
+  label_mcp_endpoint: "MCP Endpoint"
+  label_mcp_tools: "Available MCP Tools"
+
+  label_mcp_tool_name: "Tool"
+  label_mcp_tool_method: "Method"
+  label_mcp_tool_description: "Description"
+
+  label_mcp_agent_note: "Connect compatible LLM clients (e.g., OpenAI or Claude) or the Redmine Agent to this MCP endpoint."

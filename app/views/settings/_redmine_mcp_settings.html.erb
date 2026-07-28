@@ -1,0 +1,42 @@
+<div class="box">
+  <div style="display:flex; align-items:center; gap:20px;">
+    <strong style="min-width:140px;"><%= l(:label_mcp_endpoint) %></strong>
+    <code><%= mcp_url %></code>
+  </div>
+</div>
+
+<div class="box">
+  <strong><%= l(:label_mcp_tools) %></strong>
+
+  <table class="list" style="margin-top:10px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; width:50px;"><%= "#" %></th>
+        <th style="text-align:left;"><%= l(:label_mcp_tool_name) %></th>
+        <th style="text-align:left; width:80px;"><%= l(:label_mcp_tool_method) %></th>
+        <th style="text-align:left;"><%= l(:label_mcp_tool_description) %></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% RedmineMcp::Catalog.redmine_endpoints.each_with_index do |(tool, method, _, description), index| %>
+        <tr>
+          <td style="text-align:left;"><%= index + 1 %></td>
+          <td style="text-align:left;"><code><%= tool %></code></td>
+          <td style="text-align:left;"><%= method.to_s.upcase %></td>
+          <td style="text-align:left;"><%= description %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<div class="box">
+  <%= l(:label_mcp_agent_note) %>
+</div>
+
+<style>
+input[name="commit"] {
+  display: none;
+}
+</style>

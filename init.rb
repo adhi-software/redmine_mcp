@@ -28,4 +28,8 @@ Redmine::Plugin.register :redmine_mcp do
   # The MCP endpoint authenticates with a Redmine REST API key, so it does not
   # add its own project/global permission. Access to data is still bounded by
   # the authenticated user (ERPmine permissions are enforced inside each tool).
+  settings(
+    partial: 'settings/redmine_mcp_settings',
+    default: {}
+  )
 end

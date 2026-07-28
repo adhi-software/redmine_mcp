@@ -1,7 +1,7 @@
 # MCP Streamable-HTTP endpoint.
 # Clients POST JSON-RPC 2.0 messages here. A GET is used by some clients to
 # open an SSE stream; we don't push server-initiated messages, so it returns 405.
-post 'mcp', to: 'mcp#handle'
+post 'mcp', to: 'mcp#handle', as: :mcp
 get  'mcp', to: 'mcp#info'
 
 # OAuth 2.0 discovery for MCP clients that authenticate via OAuth (e.g. the
