@@ -20,6 +20,7 @@
   background: transparent;
   cursor: pointer;
   transition: background-color .2s ease;
+  color: #555;
 }
 
 .icon-only-button:hover {
@@ -27,6 +28,7 @@
 }
 
 .icon-only-button:disabled {
+  color: #2e7d32;
   cursor: default;
 }
 
