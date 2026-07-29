@@ -1,0 +1,55 @@
+<%= stylesheet_link_tag "redmine_mcp", plugin: "redmine_mcp" %>
+<%= javascript_include_tag "redmine_mcp", plugin: "redmine_mcp" %>
+<div class="box">
+  <div style="display:flex; align-items:center; gap:20px;">
+    <strong style="min-width:140px;"><%= l(:label_mcp_endpoint) %></strong>
+    <code id="mcp-endpoint-url"><%= mcp_url %></code>
+    <button
+      type="button"
+      id="copy-mcp-url"
+      class="icon-only-button"
+      aria-label="<%= l(:button_copy) %>"
+      title="<%= l(:button_copy) %>">
+
+      <span id="copy-icon">
+        <%= sprite_icon('copy') %>
+      </span>
+    </button>
+  </div>
+</div>
+
+<div class="box">
+  <%= l(:label_mcp_agent_note) %>
+</div>
+
+<div class="box">
+  <strong><%= l(:label_mcp_tools) %></strong>
+
+  <table class="list" style="margin-top:10px;">
+    <thead>
+      <tr>
+        <th style="text-align:left; width:50px;"><%= "#" %></th>
+        <th style="text-align:left;"><%= l(:label_mcp_tool_name) %></th>
+        <th style="text-align:left; width:80px;"><%= l(:label_mcp_tool_method) %></th>
+        <th style="text-align:left;"><%= l(:label_mcp_tool_description) %></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% RedmineMcp::Catalog.redmine_endpoints.each_with_index do |(tool, method, _, description), index| %>
+        <tr>
+          <td style="text-align:left;"><%= index + 1 %></td>
+          <td style="text-align:left;"><code><%= tool %></code></td>
+          <td style="text-align:left;"><%= method.to_s.upcase %></td>
+          <td style="text-align:left;"><%= description %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</div>
+
+<style>
+input[name="commit"] {
+  display: none;
+}
+</style>
