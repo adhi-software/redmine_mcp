@@ -2,20 +2,12 @@ require 'net/http'
 require 'uri'
 
 module RedmineMcp
-  # Thin HTTP client that calls the Redmine/ERPmine REST API on behalf of the
-  # authenticated user. Every MCP "REST" tool funnels through here, so the tools
-  # themselves stay declarative (see RestEndpoint / Catalog).
+  # Calls this same Redmine instance over HTTP with the caller's own API key, so
+  # every tool gets exactly the permissions and serialisation of the real REST
+  # endpoint.
   #
-  # The request is sent to this same Redmine instance over HTTP, authenticated
-  # with the user's own Redmine API key, so the call is subject to exactly the
-  # permissions and JSON serialisation of the real REST endpoint.
-  #
-  # Base URL resolution (first match wins):
-  #   1. ENV['REDMINE_MCP_BASE_URL']   e.g. http://127.0.0.1:3000
-  #   2. "#{Setting.protocol}://#{Setting.host_name}"
-  #
-  # Set ENV['REDMINE_MCP_VERIFY_SSL'] = '0' to skip TLS verification when the
-  # instance uses a self-signed certificate.
+  # Base URL: ENV['REDMINE_MCP_BASE_URL'], else Setting.protocol + host_name.
+  # ENV['REDMINE_MCP_VERIFY_SSL'] = '0' skips TLS verification (self-signed certs).
   module RestClient
     DEFAULT_OPEN_TIMEOUT = 10
     DEFAULT_READ_TIMEOUT = 60

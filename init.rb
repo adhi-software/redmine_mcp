@@ -6,16 +6,7 @@
 # as published by the Free Software Foundation; either version 2
 # of the License, or (at your option) any later version.
 
-# NOTE: Files under lib/ and app/ are loaded by Redmine through Zeitwerk
-# (see Redmine::PluginLoader#add_autoload_paths). Do NOT require them here:
-#  - lib/redmine_mcp.rb                  -> RedmineMcp
-#  - lib/redmine_mcp/server.rb           -> RedmineMcp::Server
-#  - lib/redmine_mcp/registry.rb         -> RedmineMcp::Registry
-#  - lib/redmine_mcp/catalog.rb          -> RedmineMcp::Catalog
-#  - lib/redmine_mcp/rest_endpoint.rb    -> RedmineMcp::RestEndpoint
-#  - lib/redmine_mcp/rest_client.rb      -> RedmineMcp::RestClient
-#  - app/controllers/mcp_controller.rb   -> McpController
-#  - app/controllers/mcp_oauth_controller.rb -> McpOauthController
+# Files under lib/ and app/ are autoloaded by Zeitwerk — do NOT require them here.
 
 Redmine::Plugin.register :redmine_mcp do
   name 'Redmine MCP'
@@ -25,9 +16,8 @@ Redmine::Plugin.register :redmine_mcp do
   requires_redmine version_or_higher: '6.0.0'
   author_url 'http://www.adhisoftware.co.in/'
 
-  # The MCP endpoint authenticates with a Redmine REST API key, so it does not
-  # add its own project/global permission. Access to data is still bounded by
-  # the authenticated user (ERPmine permissions are enforced inside each tool).
+  # No permission of its own: the endpoint authenticates with a REST API key and
+  # every tool is bounded by that user's own permissions.
   settings(
     partial: 'settings/redmine_mcp_settings',
     default: {}

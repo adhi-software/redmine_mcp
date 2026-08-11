@@ -1,8 +1,166 @@
-<%= stylesheet_link_tag "redmine_mcp", plugin: "redmine_mcp" %>
-<%= javascript_include_tag "redmine_mcp", plugin: "redmine_mcp" %>
-<div class="box">
-  <div style="display:flex; align-items:center; gap:20px;">
-    <strong style="min-width:140px;"><%= l(:label_mcp_endpoint) %></strong>
+<%# Inline rather than plugin assets: used only here, and plugin assets are
+    copied to public/ and need a server restart to refresh. %>
+<style>
+  /* ── Endpoint row ─────────────────────────────────────────────────────── */
+
+  .mcp-endpoint {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .mcp-endpoint-label {
+    min-width: 140px;
+  }
+
+  #mcp-endpoint-url {
+    padding: 4px 10px;
+    border: 1px solid #dfe3e8;
+    border-radius: 4px;
+    background: #f6f8fa;
+    font-size: 1.05em;
+  }
+
+  .mcp-note {
+    margin: 12px 0 0;
+    color: #555;
+  }
+
+  /* ── Section headers ──────────────────────────────────────────────────── */
+
+  /* "Available MCP Tools" — the heading over the whole tool catalogue. */
+  .mcp-section-title {
+    margin: 26px 0 14px;
+    padding-bottom: 7px;
+    border-bottom: 1px solid #dfe3e8;
+    color: #2c3e50;
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  /* One box per source: core Redmine tools, then each contributing plugin. */
+  .mcp-tools-group {
+    margin: 0 0 20px;
+    padding: 4px 14px 14px;
+    border: 1px solid #dfe3e8;
+    border-radius: 6px;
+    background: #fff;
+  }
+
+  .mcp-tools-group > legend {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 8px;
+    color: #2c3e50;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+  }
+
+  /* Tool count, kept visually secondary to the section name. */
+  .mcp-tools-count {
+    padding: 1px 8px;
+    border-radius: 10px;
+    background: #eef2f7;
+    color: #4a5b6b;
+    font-size: 11px;
+    font-weight: 600;
+  }
+
+  /* ── Tool table ───────────────────────────────────────────────────────── */
+
+  .mcp-tools-group table.list {
+    margin-top: 6px;
+  }
+
+  .mcp-tools-group table.list th {
+    background: #f6f8fa;
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  .mcp-tools-group table.list td {
+    text-align: left;
+    vertical-align: middle;
+  }
+
+  .mcp-col-index  { width: 44px; }
+  .mcp-col-method { width: 84px; }
+  .mcp-col-name   { width: 22%; }
+
+  .mcp-tool-name code {
+    background: none;
+    color: #1f2d3d;
+    font-weight: 600;
+  }
+
+  .mcp-tool-desc {
+    color: #444;
+    line-height: 1.45;
+  }
+
+  /* HTTP verb badge — colour-coded so reads and writes are told apart at a
+     glance. Unknown verbs fall back to the neutral base style. */
+  .mcp-method {
+    display: inline-block;
+    min-width: 46px;
+    padding: 1px 6px;
+    border-radius: 3px;
+    background: #eef2f7;
+    color: #4a5b6b;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .03em;
+    text-align: center;
+  }
+
+  .mcp-method-get    { background: #e8f1fb; color: #1a5fa8; }
+  .mcp-method-post   { background: #e6f5ea; color: #1e7a3c; }
+  .mcp-method-put    { background: #fdf3e2; color: #8a5a08; }
+  .mcp-method-patch  { background: #fdf3e2; color: #8a5a08; }
+  .mcp-method-delete { background: #fdeaea; color: #a32020; }
+
+  /* The page only displays the catalogue, so there is nothing to save. */
+  input[name="commit"] {
+    display: none;
+  }
+
+  /* ── Copy-to-clipboard button ─────────────────────────────────────────── */
+
+  .icon-only-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    cursor: pointer;
+    transition: background-color .2s ease;
+    color: #555;
+  }
+
+  .icon-only-button:hover {
+    background: rgba(0,0,0,.06);
+  }
+
+  .icon-only-button:disabled {
+    color: #2e7d32;
+    cursor: default;
+  }
+
+  .icon-only-button svg {
+    width: 16px;
+    height: 16px;
+  }
+</style>
+
+<div class="mcp-settings">
+  <div class="mcp-endpoint">
+    <strong class="mcp-endpoint-label"><%= l(:label_mcp_endpoint) %></strong>
     <code id="mcp-endpoint-url"><%= mcp_url %></code>
     <button
       type="button"
@@ -16,40 +174,94 @@
       </span>
     </button>
   </div>
+
+  <p class="mcp-note"><%= l(:label_mcp_agent_note) %></p>
+
+  <h3 class="mcp-section-title"><%= l(:label_mcp_tools) %></h3>
+
+  <%# One table per source, so the tools a plugin contributes are listed on
+      their own instead of being mixed into the core Redmine list. Together the
+      tables cover exactly what tools/list advertises (Catalog.entries): the
+      core rows, then the rows each plugin (e.g. erpmine_mcp) contributes
+      through the :redmine_mcp_register_tools hook. %>
+  <%= render partial: 'settings/redmine_mcp_tools_table',
+             locals: { title: l(:label_mcp_tools_redmine),
+                       rows: RedmineMcp::Catalog.redmine_endpoints } %>
+
+  <% RedmineMcp::Catalog.plugin_endpoint_groups.each do |label, rows| %>
+    <%= render partial: 'settings/redmine_mcp_tools_table',
+               locals: { title: label, rows: rows } %>
+  <% end %>
 </div>
 
-<div class="box">
-  <%= l(:label_mcp_agent_note) %>
-</div>
+<script>
+  // Copies the endpoint URL and swaps the copy icon for a tick for 1.5s.
+  document.addEventListener("DOMContentLoaded", function () {
+    const button = document.getElementById("copy-mcp-url");
+    const url = document.getElementById("mcp-endpoint-url");
+    const icon = document.getElementById("copy-icon");
 
-<div class="box">
-  <strong><%= l(:label_mcp_tools) %></strong>
+    if (!button || !url || !icon) return;
 
-  <table class="list" style="margin-top:10px;">
-    <thead>
-      <tr>
-        <th style="text-align:left; width:50px;"><%= "#" %></th>
-        <th style="text-align:left;"><%= l(:label_mcp_tool_name) %></th>
-        <th style="text-align:left; width:80px;"><%= l(:label_mcp_tool_method) %></th>
-        <th style="text-align:left;"><%= l(:label_mcp_tool_description) %></th>
-      </tr>
-    </thead>
+    const COPY_ICON = icon.innerHTML;
 
-    <tbody>
-      <% RedmineMcp::Catalog.redmine_endpoints.each_with_index do |(tool, method, _, description), index| %>
-        <tr>
-          <td style="text-align:left;"><%= index + 1 %></td>
-          <td style="text-align:left;"><code><%= tool %></code></td>
-          <td style="text-align:left;"><%= method.to_s.upcase %></td>
-          <td style="text-align:left;"><%= description %></td>
-        </tr>
-      <% end %>
-    </tbody>
-  </table>
-</div>
+    const CHECK_ICON = `
+      <svg viewBox="0 0 16 16" width="16" height="16" aria-hidden="true">
+        <path
+          d="M3 8.5L6.5 12L13 4.5"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+      </svg>`;
 
-<style>
-input[name="commit"] {
-  display: none;
-}
-</style>
+    let resetTimer;
+
+    async function copyText(text) {
+      if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text);
+        return;
+      }
+
+      const textarea = document.createElement("textarea");
+      textarea.value = text;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+
+      document.body.appendChild(textarea);
+      textarea.select();
+
+      const copied = document.execCommand("copy");
+
+      document.body.removeChild(textarea);
+
+      if (!copied) {
+        throw new Error("Clipboard copy failed.");
+      }
+    }
+
+    button.addEventListener("click", async function () {
+      if (button.disabled) return;
+
+      try {
+        button.disabled = true;
+
+        await copyText(url.textContent.trim());
+
+        icon.innerHTML = CHECK_ICON;
+
+        clearTimeout(resetTimer);
+
+        resetTimer = setTimeout(function () {
+          icon.innerHTML = COPY_ICON;
+          button.disabled = false;
+        }, 1500);
+
+      } catch (error) {
+        console.error("Failed to copy MCP endpoint:", error);
+        button.disabled = false;
+      }
+    });
+  });
+</script>

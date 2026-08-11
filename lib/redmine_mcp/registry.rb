@@ -1,14 +1,6 @@
 module RedmineMcp
-  # Central catalogue of available tools.
-  #
-  # Every tool is a REST endpoint described declaratively in Catalog and wrapped
-  # by a RestEndpoint instance. Building the list eagerly (rather than
-  # auto-discovering classes) keeps behaviour identical under Rails lazy
-  # autoloading (development) and eager loading (production).
-  #
-  # To expose a new core Redmine endpoint, add a row to RedmineMcp::Catalog.
-  # Plugin-specific tools (e.g. ERPmine) are contributed from their own plugin
-  # via the :redmine_mcp_register_tools hook and merged in by Catalog.entries.
+  # Builds the tool list from Catalog. Eager rather than class auto-discovery, so
+  # behaviour is the same under lazy (development) and eager (production) loading.
   module Registry
     module_function
 

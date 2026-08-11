@@ -1,21 +1,12 @@
-# OAuth 2.0 discovery + dynamic client registration for MCP clients.
+# OAuth 2.0 discovery + dynamic client registration, for MCP clients that
+# authenticate with OAuth rather than an API key (the claude.ai web connector).
 #
-# The claude.ai web connector authenticates remote MCP servers with OAuth
-# (per the MCP Authorization spec). It expects, at the resource's domain root:
-#   * GET  /.well-known/oauth-protected-resource   (RFC 9728)
-#   * GET  /.well-known/oauth-authorization-server (RFC 8414)
-#   * POST <registration_endpoint>                 (RFC 7591, dynamic reg.)
-# then runs the Authorization Code + PKCE flow against the authorization server.
+# Only the discovery documents (RFC 9728, RFC 8414) and dynamic registration
+# (RFC 7591) live here — Redmine's own Doorkeeper provider handles authorize,
+# token and PKCE, and McpController accepts the bearer tokens it issues.
 #
-# Redmine already ships a full OAuth2 provider (Doorkeeper): /oauth/authorize and
-# /oauth/token, with PKCE and the authorization_code grant enabled. This
-# controller only adds the discovery documents and a dynamic-registration
-# endpoint that creates a Doorkeeper application; the actual authorize/token
-# exchange and the resulting bearer tokens are handled by Doorkeeper. The MCP
-# endpoint (McpController) accepts those bearer tokens.
-#
-# Inherits from ActionController::Base to stay outside Redmine's session/login
-# machinery — these endpoints are unauthenticated by design.
+# Inherits ActionController::Base to stay outside Redmine's session/login
+# machinery: these endpoints are unauthenticated by design.
 class McpOauthController < ActionController::Base
   skip_forgery_protection
 
@@ -44,11 +35,9 @@ class McpOauthController < ActionController::Base
     }
   end
 
-  # POST /oauth/mcp_register  (RFC 7591 Dynamic Client Registration)
-  #
-  # Creates a Doorkeeper application from the client's metadata so the connector
-  # gets a client_id without a human pre-registering it. Public clients
-  # (token_endpoint_auth_method = "none", PKCE) are created non-confidential.
+  # POST /oauth/mcp_register (RFC 7591). Creates a Doorkeeper application so the
+  # connector gets a client_id with no human pre-registration. Public clients
+  # (token_endpoint_auth_method "none", PKCE) are created non-confidential.
   def register
     body = parse_json_body
     redirect_uris = Array(body['redirect_uris']).reject(&:blank?)
@@ -90,9 +79,8 @@ class McpOauthController < ActionController::Base
 
   private
 
-  # Public base URL the client reaches us on. Reuses the MCP REST base-URL
-  # resolution (ENV['REDMINE_MCP_BASE_URL'] or Setting.protocol/host_name) so
-  # the advertised endpoints match what the connector actually calls.
+  # Reuses the REST base-URL resolution so advertised endpoints match what the
+  # connector actually calls.
   def base_url
     RedmineMcp::RestClient.base_url
   end

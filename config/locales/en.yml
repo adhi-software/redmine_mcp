@@ -1,6 +1,7 @@
 en:
   label_mcp_endpoint: "MCP Endpoint"
   label_mcp_tools: "Available MCP Tools"
+  label_mcp_tools_redmine: "Redmine Tools"
 
   label_mcp_tool_name: "Tool"
   label_mcp_tool_method: "Method"
