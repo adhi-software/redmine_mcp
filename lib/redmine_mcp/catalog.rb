@@ -1,28 +1,32 @@
+# Redmine MCP
+# Copyright (C) 2026-  Adhi software pvt ltd
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 module RedmineMcp
-  # The declarative catalogue of REST API endpoints exposed as MCP tools.
+  # The catalogue of REST endpoints exposed as MCP tools. Each entry is
+  # [tool_name, http_method, path_template, description]; add a row to expose
+  # another endpoint, no new class needed.
   #
-  # Each entry is [tool_name, http_method, path_template, description]. The path
-  # is the real Redmine/ERPmine URL (always the .json representation); ":name"
-  # segments are required path parameters. RestEndpoint turns each entry into a
-  # callable tool, and RestClient performs the HTTP request with the caller's
-  # API key.
+  # Deliberately minimal — a large tool list costs tokens on every model request
+  # — so this holds each core module's list and detail endpoints, plus writes for
+  # Issues and Time entries only.
   #
-  # MINIMAL TOOL SET: to keep the tool list small (a large tool list inflates
-  # every model request), only each module's "list" endpoint (list_* / *_index)
-  # and its "detail/edit" endpoint (get_* / *_edit) are exposed — plus
-  # create/update writes for the high-traffic Issues and Time entries modules.
-  # Other endpoints (remaining writes, dropdown/option helpers, reports,
-  # exports, sub-resource lookups, search, etc.) are intentionally omitted. To
-  # expose another core Redmine endpoint, add a row here — no new class is
-  # needed.
-  #
-  # PLUGIN TOOLS: this plugin only owns the MCP protocol/server and the core
-  # Redmine REST surface. Tools that belong to a specific plugin (e.g. the
-  # ERPmine modules in redmine_wktime) are NOT listed here. Instead each plugin
-  # contributes its own rows at runtime through the :redmine_mcp_register_tools
-  # hook (see #plugin_endpoints), so those tool definitions ship and version
-  # with the plugin that implements them. If a contributing plugin is absent,
-  # its tools are simply not registered.
+  # Plugin-specific tools are NOT listed here. Each plugin contributes its own
+  # rows through the :redmine_mcp_register_tools hook so they ship and version
+  # with it; if the plugin is absent its tools simply aren't registered.
   module Catalog
     module_function
 
@@ -82,21 +86,43 @@ module RedmineMcp
       ]
     end
 
-    # Rows contributed by other plugins through the :redmine_mcp_register_tools
-    # hook. Each listener returns an array of catalogue rows in the same
-    # [tool_name, http_method, path, description] shape used above; call_hook
-    # wraps those per-listener returns in an outer array, which we flatten by
-    # one level. Malformed returns (non-arrays, or rows that are not 4-element
-    # arrays) are ignored so a misbehaving plugin cannot break tools/list.
+    # Plugin-contributed rows as [label, rows] pairs, so the settings page can
+    # group each plugin's tools. Listeners are invoked directly rather than via
+    # call_hook, which discards which listener produced which rows. A listener
+    # that raises or returns malformed rows is ignored — a misbehaving plugin
+    # must not break tools/list.
+    def plugin_endpoint_groups
+      Redmine::Hook.hook_listeners(:redmine_mcp_register_tools).filter_map do |listener|
+        rows =
+          begin
+            Array(listener.redmine_mcp_register_tools({}))
+              .select { |row| row.is_a?(Array) && row.size == 4 }
+          rescue StandardError => e
+            Rails.logger.error("redmine_mcp: #{listener.class} failed to register tools: #{e.message}")
+            []
+          end
+        [group_label(listener), rows] if rows.any?
+      end
+    end
+
+    # Rows contributed by other plugins, flattened — what tools/list registers.
     def plugin_endpoints
-      Redmine::Hook.call_hook(:redmine_mcp_register_tools)
-                   .flatten(1)
-                   .select { |row| row.is_a?(Array) && row.size == 4 }
+      plugin_endpoint_groups.flat_map(&:last)
     end
 
     # All catalogue rows (core Redmine first, then plugin-contributed).
     def entries
       redmine_endpoints + plugin_endpoints
+    end
+
+    # Heading for a contributing plugin's group of tools. A listener names its
+    # plugin by defining #mcp_plugin_id (see ErpmineMcpHook), which gives the
+    # registered plugin's display name; otherwise the class name is used.
+    def group_label(listener)
+      id = listener.mcp_plugin_id if listener.respond_to?(:mcp_plugin_id)
+      return Redmine::Plugin.find(id).name if id && Redmine::Plugin.installed?(id)
+
+      listener.class.name.to_s.underscore.sub(/_hook\z/, '').humanize
     end
   end
 end

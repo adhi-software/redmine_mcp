@@ -1,13 +1,27 @@
-# MCP Streamable-HTTP transport for Redmine/ERPmine.
+# Redmine MCP
+# Copyright (C) 2026-  Adhi software pvt ltd
 #
-# Speaks JSON-RPC 2.0 over HTTP POST. Authenticates with a Redmine REST API key
-# supplied as `Authorization: Bearer <key>`, the `X-Redmine-API-Key` header, or
-# a `key` query param. The authenticated user becomes User.current for the
-# duration of the request, so every tool runs with that user's data scope and
-# ERPmine permissions.
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
 #
-# Inherits from ActionController::Base (not Redmine's ApplicationController) to
-# bypass session/login/menu machinery and CSRF; we do our own key auth instead.
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
+# MCP Streamable-HTTP transport: JSON-RPC 2.0 over HTTP POST, authenticated with
+# a Redmine REST API key (bearer, X-Redmine-API-Key header, or `key` param). The
+# authenticated user becomes User.current, so every tool runs in that user's
+# data scope and ERPmine permissions.
+#
+# Inherits ActionController::Base, not Redmine's ApplicationController, to bypass
+# session/login/menu machinery and CSRF — key auth is done here instead.
 class McpController < ActionController::Base
   skip_forgery_protection
 
@@ -93,9 +107,8 @@ class McpController < ActionController::Base
   end
 
   def render_unauthorized
-    # Point OAuth-capable clients (e.g. the claude.ai web connector) at the
-    # protected-resource metadata so they can discover the authorization server
-    # and run the OAuth flow. API-key clients can ignore this header.
+    # Points OAuth-capable clients at the protected-resource metadata so they can
+    # discover the authorization server. API-key clients ignore it.
     metadata_url = "#{RedmineMcp::RestClient.base_url}/.well-known/oauth-protected-resource"
     response.headers['WWW-Authenticate'] =
       %(Bearer realm="Redmine MCP", resource_metadata="#{metadata_url}")

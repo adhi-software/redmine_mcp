@@ -1,0 +1,32 @@
+<%# One table of MCP tools. locals: title, rows ([tool, method, path, description]).
+    Widths, alignment and the verb badge colours live in redmine_mcp.css. %>
+<fieldset class="box mcp-tools-group">
+  <legend>
+    <span class="mcp-tools-name"><%= title %></span>
+    <span class="mcp-tools-count"><%= rows.size %></span>
+  </legend>
+
+  <table class="list">
+    <thead>
+      <tr>
+        <th class="mcp-col-index"><%= "#" %></th>
+        <th class="mcp-col-name"><%= l(:label_mcp_tool_name) %></th>
+        <th class="mcp-col-method"><%= l(:label_mcp_tool_method) %></th>
+        <th><%= l(:label_mcp_tool_description) %></th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <% rows.each_with_index do |(tool, method, _path, description), index| %>
+        <tr>
+          <td class="mcp-col-index"><%= index + 1 %></td>
+          <td class="mcp-tool-name"><code><%= tool %></code></td>
+          <td>
+            <span class="mcp-method mcp-method-<%= method.to_s.downcase %>"><%= method.to_s.upcase %></span>
+          </td>
+          <td class="mcp-tool-desc"><%= description %></td>
+        </tr>
+      <% end %>
+    </tbody>
+  </table>
+</fieldset>

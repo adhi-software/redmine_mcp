@@ -1,23 +1,29 @@
+# Redmine MCP
+# Copyright (C) 2026-  Adhi software pvt ltd
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+
 require 'erb'
 
 module RedmineMcp
-  # One MCP tool that maps to one Redmine/ERPmine REST API URL.
+  # One MCP tool wrapping one REST URL, built from a Catalog row rather than a
+  # hand-written class per endpoint.
   #
-  # Instead of hand-writing a class per endpoint, each endpoint is described
-  # declaratively in Catalog and wrapped by an instance of this class. The
-  # instance exposes the same surface the Server expects from a tool:
-  #   * #tool_name   - the MCP tool name
-  #   * #definition  - the tools/list descriptor (name, description, inputSchema)
-  #   * #call(args, context) - perform the HTTP request and return the result
-  #
-  # Path templates use ":param" placeholders (e.g. "/issues/:id.json"); each
-  # placeholder becomes a required string argument. Two generic arguments cover
-  # everything else the REST API accepts:
-  #   * "query" - object merged into the URL query string (filters, pagination,
-  #               include=..., and any identifiers an ERPmine action reads from
-  #               params).
-  #   * "body"  - object sent as the JSON request body for write methods, shaped
-  #               exactly like the REST API expects (e.g. {"issue": {...}}).
+  # ":param" in a path becomes a required string argument. Everything else rides
+  # on two generic arguments: "query" (merged into the query string) and "body"
+  # (the JSON request body, for writes).
   class RestEndpoint
     WRITE_METHODS = %i[post put patch].freeze
 
