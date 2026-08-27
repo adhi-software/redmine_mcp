@@ -11,15 +11,15 @@ A Redmine plugin that provides access to Redmine data through the MCP tool.
 
 | Redmine Version | Plugin Version |
 |-----------------|----------------|
-| 7.0.x            | 1.0           |
+| 7.0.x            | 1.0, 1.0.1    |
 
 ---
 
-## Release Notes for v1.0
+## Release Notes for v1.0.1
 
 - **Features**
   ```text
-   - Supports get, create, and update tools.
+   - Added hook for MCP plugin tool.
   ```
 ---
 

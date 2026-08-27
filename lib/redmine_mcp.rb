@@ -17,7 +17,7 @@
 
 # Top-level namespace for the Redmine/ERPmine MCP server.
 module RedmineMcp
-  VERSION = '1.0'
+  VERSION = '1.0.1'
 
   # Fallback when the client requests a version we don't support, or none. MUST
   # be a real revision we speak (the newest in Server::SUPPORTED_PROTOCOL_VERSIONS)
