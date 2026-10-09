@@ -13,7 +13,6 @@ Redmine::Plugin.register :redmine_mcp do
   author 'Adhi Software Pvt Ltd'
   description 'Redmine MCP'
   version RedmineMcp::VERSION
-  url 'https://www.redmine.org/plugins/redmine_mcp'
   requires_redmine version_or_higher: '6.0.0'
   author_url 'http://www.adhisoftware.co.in/'
 
